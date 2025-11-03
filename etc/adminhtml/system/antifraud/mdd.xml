@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author      Nexaas Team <dev@nexaas.com>
+ * @copyright   2025 Nexaas (http://www.nexxaas.com)
+ * @license     http://www.nexaas.com  Copyright
+ *
+ * @link        http://www.nexaas.com
+ *
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="mdd" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>MDD's</label>
+        <field id="fetch_self_shipping_method" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
+            <label>Customer fetch self Shipping Method</label>
+            <comment />
+            <source_model>\Magento\Shipping\Model\Config\Source\Allmethods</source_model>
+        </field>
+
+        <field id="store_code_to_fetch_self" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="15" translate="label" type="text">
+            <label>Store Code From Customer Fetch Self</label>
+            <comment />
+        </field>
+
+        <field id="vertical_segment" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="select">
+            <label>Vertical Segment</label>
+            <comment />
+            <source_model>\Braspag\BraspagPagador\Model\Source\VerticalSegment</source_model>
+        </field>
+
+        <field id="store_identity" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="40" translate="label" type="text">
+            <label>Store Identity (CNPJ)</label>
+            <comment />
+        </field>
+
+        <field id="category_attribute_code" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="50" translate="label" type="text">
+            <label>Category Attribute Code</label>
+            <comment />
+        </field>
+
+        <field id="custom_mdd" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="60" translate="label" type="select">
+            <label>Custom MDD? </label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <comment />
+        </field>
+
+        <field id="custom_value_85" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="61" translate="label" type="select">
+            <label>Custom Value(85):</label>
+             <depends>
+                <field id="custom_mdd">1</field>
+            </depends>
+            <comment />
+            <source_model>\Braspag\BraspagPagador\Model\Source\MddCustom</source_model>
+        </field>
+
+          <field id="custom_value_86" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="62" translate="label" type="select">
+            <label>Custom Value(86):</label>
+             <depends>
+                <field id="custom_mdd">1</field>
+            </depends>
+            <comment />
+            <source_model>\Braspag\BraspagPagador\Model\Source\MddCustom</source_model>
+        </field>
+
+          <field id="custom_value_87" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="63" translate="label" type="select">
+            <label>Custom Value(87):</label>
+             <depends>
+                <field id="custom_mdd">1</field>
+            </depends>
+            <comment />
+            <source_model>\Braspag\BraspagPagador\Model\Source\MddCustom</source_model>
+        </field>
+
+          <field id="custom_value_88" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="64" translate="label" type="select">
+            <label>Custom Value(88):</label>
+             <depends>
+                <field id="custom_mdd">1</field>
+            </depends>
+            <comment />
+            <source_model>\Braspag\BraspagPagador\Model\Source\MddCustom</source_model>
+        </field>
+
+          <field id="custom_value_89" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="65" translate="label" type="select">
+            <label>Custom Value(89):</label>
+             <depends>
+                <field id="custom_mdd">1</field>
+            </depends>
+            <comment />
+            <source_model>\Braspag\BraspagPagador\Model\Source\MddCustom</source_model>
+        </field>
+
+
+    </group>
+</include>

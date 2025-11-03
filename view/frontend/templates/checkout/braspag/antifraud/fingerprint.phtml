@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @author      Nexaas Team <dev@nexaas.com>
+ * @copyright   2025 Nexaas (http://www.nexxaas.com)
+ * @license     http://www.nexaas.com  Copyright
+ *
+ * @link        http://www.nexaas.com
+ *
+ */
+
+/**
+ * @var \Braspag\BraspagPagador\Block\AntiFraud\FingerPrint $this;
+ */
+?>
+
+<noscript>
+    <iframe src="<?php echo $this->getFingerPrint()->getSrcJsUrl() ?>?<?php echo $this->getSrcParams() ?>"></iframe>
+</noscript>
+
+
+<?= $secureRenderer->renderTag('script', ['type' => 'text/javascript', 'src' => $this->getFingerPrint()->getSrcJsUrl() . "?" . $this->getSrcParams()], "", false); ?>

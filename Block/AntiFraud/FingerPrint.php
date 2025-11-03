@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @author      Nexaas Team <dev@nexaas.com>
+ * @copyright   2025 Nexaas (http://www.nexxaas.com)
+ * @license     http://www.nexaas.com  Copyright
+ *
+ * @link        http://www.nexaas.com
+ *
+ */
+
+namespace Braspag\BraspagPagador\Block\AntiFraud;
+
+use Magento\Framework\View\Element\Template;
+use Magento\Framework\View\Element\Template\Context;
+use Braspag\BraspagPagador\Api\Data\AntiFraudFingerPrintInterface;
+
+class FingerPrint extends Template
+{
+    protected $fingerPrint;
+
+    /**
+     * FingerPrint constructor.
+     * @param Context $context
+     * @param array $data
+     * @param AntiFraudFingerPrintInterface $antiFraudFingerPrint
+     */
+    public function __construct(Context $context, array $data, AntiFraudFingerPrintInterface $antiFraudFingerPrint)
+    {
+        parent::__construct($context, $data);
+        $this->setFingerPrint($antiFraudFingerPrint);
+    }
+
+    public function getSrcParams()
+    {
+        $data = [
+            'org_id' => $this->getFingerPrint()->getOrgId(),
+            'session_id' => $this->getFingerPrint()->getSessionId(),
+        ];
+
+        return http_build_query($data);
+    }
+
+    /**
+     * @return AntiFraudFingerPrintInterface
+     */
+    public function getFingerPrint()
+    {
+        return $this->fingerPrint;
+    }
+
+    /**
+     * @param AntiFraudFingerPrintInterface $antiFraudFingerPrint
+     * @return $this
+     */
+    public function setFingerPrint(AntiFraudFingerPrintInterface $antiFraudFingerPrint)
+    {
+        $this->fingerPrint = $antiFraudFingerPrint;
+        return $this;
+    }
+}

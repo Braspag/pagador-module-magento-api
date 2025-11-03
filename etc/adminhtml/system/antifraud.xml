@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @author      Nexaas Team <dev@nexaas.com>
+ * @copyright   2025 Nexaas (http://www.nexxaas.com)
+ * @license     http://www.nexaas.com  Copyright
+ *
+ * @link        http://www.nexaas.com
+ *
+ */
+-->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <section id="braspag_braspag_antifraud" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Anti Fraud</label>
+        <tab>braspag_braspag</tab>
+        <resource>Braspag_BraspagPagador::config</resource>
+
+        <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>General</label>
+            <field id="active" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="select">
+                <label>Enabled</label>
+                <comment />
+                <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            </field>
+           
+            <field id="af_type" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="20" translate="label" type="select">
+                <label>Anti Fraud</label>
+                <depends>
+                    <field id="active">1</field>
+                </depends>
+                <comment />
+                <source_model>\Braspag\BraspagPagador\Model\Source\AntiFraud</source_model>
+           </field>
+
+        </group>
+
+
+
+        <include path="Braspag_BraspagPagador::system/antifraud/fingerprint.xml"/>
+        <include path="Braspag_BraspagPagador::system/antifraud/options.xml"/>
+        <include path="Braspag_BraspagPagador::system/antifraud/mdd.xml"/>
+    </section>
+</include>

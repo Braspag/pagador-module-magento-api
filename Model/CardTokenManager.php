@@ -1,0 +1,194 @@
+<?php
+
+/**
+ * @author      Nexaas Core Team <dev@nexaas.com>
+ * @copyright   2025 Nexaas (http://www.nexaas.com)
+ * @license     http://www.nexaas.com  Copyright
+ *
+ * @link        http://www.nexaas.com
+ */
+
+namespace Braspag\BraspagPagador\Model;
+
+use Magento\Framework\Api\SearchCriteriaBuilder;
+use Magento\Framework\DataObject;
+use Magento\Framework\Event\ManagerInterface;
+use Braspag\BraspagPagador\Api\CardTokenManagerInterface;
+use Braspag\BraspagPagador\Api\CardTokenRepositoryInterface;
+use Braspag\BraspagPagador\Api\Data\CardTokenInterface;
+use Braspag\BraspagPagador\Gateway\Transaction\CreditCard\Config\ConfigInterface;
+
+class CardTokenManager implements CardTokenManagerInterface
+{
+    /**
+     * @var
+     */
+    protected $cardTokenRepository;
+
+    /**
+     * @var
+     */
+    protected $eventManager;
+
+    /**
+     * @var
+     */
+    protected $searchCriteriaBuilder;
+
+    /**
+     * @var ConfigInterface
+     */
+    protected $config;
+
+    
+    protected $CardTokenRepository;
+
+
+    /**
+     * CardTokenHandler constructor.
+     *
+     * @param CardTokenRepositoryInterface $cardTokenRepository
+     * @param ManagerInterface             $eventManager
+     * @param SearchCriteriaBuilder        $searchCriteriaBuilder
+     */
+    public function __construct(
+        CardTokenRepositoryInterface $cardTokenRepository,
+        ManagerInterface $eventManager,
+        SearchCriteriaBuilder $searchCriteriaBuilder,
+        ConfigInterface $config
+
+    ) {
+        $this->setCardTokenRepository($cardTokenRepository);
+        $this->setEventManager($eventManager);
+        $this->setSearchCriteriaBuilder($searchCriteriaBuilder);
+        $this->setConfig($config);
+    }
+
+    public function registerCardToken($customerId, $paymentMethod, $response)
+    {
+        if ($cardToken = $this->getCardTokenRepository()->get($response->getPaymentCardToken())) {
+            return $cardToken;
+        }
+
+        if ($this->getConfig()->isAutoDisablePreviousCardsToken())
+        {
+            $searchCriteriaBuilder = $this->getSearchCriteriaBuilder();
+            $searchCriteriaBuilder->addFilter('method', $paymentMethod);
+            $searchCriteriaBuilder->addFilter('customer_id', $customerId);
+            $searchCriteriaBuilder->addFilter('brand', $response->getPaymentCardBrand());
+            $searchCriteria = $searchCriteriaBuilder->create();
+    
+            $searchResult = $this->getCardTokenRepository()->getList($searchCriteria);
+    
+            foreach ($searchResult->getItems() as $item) {
+                $this->disable($item);
+            }
+        }
+
+        $data = new DataObject([
+            'alias' => $response->getPaymentCardNumberEncrypted(),
+            'token' => $response->getPaymentCardToken(),
+            'provider' => $response->getPaymentCardProvider(),
+            'brand' => $response->getPaymentCardBrand(),
+            'method' => $paymentMethod,
+            'mask'   => $response->getPaymentAuthorizationCode()
+        ]);
+
+        $cardToken = $this->getCardTokenRepository()->create($data->toArray());
+
+        $this->getCardTokenRepository()->save($cardToken);
+
+        return $cardToken;
+    }
+
+    protected function deleteCardToken($cardToken)
+    {
+        $this->getCardTokenRepository()->delete($cardToken);
+    }
+
+    /**
+     * @param $cardToken
+     *
+     * @throws \Magento\Framework\Exception\LocalizedException
+     */
+    public function disable(CardTokenInterface $cardToken)
+    {
+        try {
+            $cardTokenId = $cardToken->getId();
+            if (!empty($cardTokenId)) {
+                $cardToken->setActive(0);
+                $this->getCardTokenRepository()->save($cardToken);
+            }
+        } catch (\Exception $e) {
+            throw new \Magento\Framework\Exception\LocalizedException(__('Unable to disable Card Token'));
+        }
+    }
+
+
+    /**
+     * @return mixed
+     */
+    protected function getSearchCriteriaBuilder()
+    {
+        return $this->searchCriteriaBuilder;
+    }
+
+    /**
+     * @param mixed $searchCriteriaBuilder
+     */
+    protected function setSearchCriteriaBuilder($searchCriteriaBuilder)
+    {
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getCardTokenRepository()
+    {
+        return $this->CardTokenRepository;
+    }
+
+    /**
+     * @param CardTokenRepositoryInterface $cardTokenRepository
+     *
+     * @return $this
+     */
+    protected function setCardTokenRepository(CardTokenRepositoryInterface $cardTokenRepository)
+    {
+        $this->CardTokenRepository = $cardTokenRepository;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getEventManager()
+    {
+        return $this->eventManager;
+    }
+
+    /**
+     * @param $eventManager
+     *
+     * @return $this
+     */
+    protected function setEventManager($eventManager)
+    {
+        $this->eventManager = $eventManager;
+
+        return $this;
+    }
+
+    public function setConfig($config)
+    {
+        $this->config = $config;
+        return $this;
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
+    }
+}
