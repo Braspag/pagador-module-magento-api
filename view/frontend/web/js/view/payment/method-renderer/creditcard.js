@@ -821,7 +821,7 @@ define(
              * @returns {Object}
              */
             getCcYears: function () {
-                return window.checkoutConfig.payment.ccform.years[this.getCode()];
+                return window.checkoutConfig.payment.braspag_ccform.years[this.getCode()];
             },
 
             /**
