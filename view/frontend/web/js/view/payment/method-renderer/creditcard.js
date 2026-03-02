@@ -146,39 +146,35 @@ define(
 
                     $('input#braspag_pagador_creditcard_cc_number').val('');
 
-                    this.creditCardType.subscribe(function () { 
-                        let  value = self.creditCardAmount();
-
-                        if(!Number.isInteger(value))
-                        value = value.replace('.', '').replace(',', '.');
-
-                        self.getCcInstallments(value);
-                    
-
+                    this.creditCardType.subscribe(function () {
+                        self.getCcInstallments();
                     });
 
-                    this.creditCardNumber.subscribe(function (value) { 
-                
+                    this.creditCardNumber.subscribe(function (value) {
+
                         self.showBrandList(false);
-                        
-                        setTimeout(function(){ 
-                             self.oldCardBrand( $('.creditcard-type').val()) 
+
+                        setTimeout(function(){
+                             self.oldCardBrand( $('.creditcard-type').val());
+                             self.loadCreditCardBrands();
                          }, 1000);
 
                          self.oldCardNumber(value);
                      });
 
 
-                    this.selectBrand.subscribe(function (value) { 
+                    this.selectBrand.subscribe(function (value) {
 
-                        $('.creditcard-type').val("Braspag-"+value.split('-')[1]);
-                
+                        if (!value) return;
+                        var brandValue = 'Braspag-' + value.split('-')[1];
+                        $('.creditcard-type').val(brandValue);
+                        self.creditCardType(brandValue);
+
                         if (self.oldCardBrand().split('-')[1] != undefined && self.oldCardBrand().split('-')[1] != value.split('-')[1] ) {
                            $('.card-wrapper .jp-card-container').hide();
                         }else if( self.oldCardBrand().split('-')[1] == value.split('-')[1]) {
                             $('.card-wrapper .jp-card-container').show();
                         }
-                        
 
                     });
 
@@ -315,10 +311,8 @@ define(
                     data.additional_data.cc_installments_card2 = towCardComponent.creditCardInstallments()
                     data.additional_data.card_cc_token_card2 = towCardComponent.cardTokenValue()
                     data.additional_data.cc_installments_text_card2 = $('select#braspag_pagador_creditcard_two_card_installments option:selected').text()
-
-                    if ($('.creditcard-type-two').val() != undefined) {
-                        data.additional_data.cc_type_card2 = $('.creditcard-type-two').val()
-                    }
+                    data.additional_data.cc_cid_card2 = towCardComponent.creditCardVerificationNumber()
+                    data.additional_data.cc_type_card2 = $('.creditcard-type-two').val()
                 }
               
 
@@ -376,22 +370,27 @@ define(
 
                let  cardType = $('.creditcard-type').val();
 
-                if (cardType != undefined) {
+                if (cardType) {
 
                     self.showBrandList(true);
-                    
+
                     let brandsObject =  this.brandListOptions();
 
                     for (let i = 0, len = brandsObject.length; i < len; i++) {
                         if (!brandsObject[i]) continue;
-                      
+
                        if(cardType.split('-')[1] == brandsObject[i].split('-')[1]) {
                           self.selectBrand(brandsObject[i]);
                           break;
                        }
-    
+
                     }
 
+                } else {
+                    self.selectBrand('');
+                    if (self.creditCardNumber() && self.creditCardNumber().length > 0) {
+                        self.showBrandList(true);
+                    }
                 }
 
                 if(self.creditCardNumber() == undefined || self.creditCardNumber().length == 0)
@@ -761,14 +760,31 @@ define(
                     return false;
                 }
 
+                var ccTypeCard1 = $('.creditcard-type').val();
+                if (!ccTypeCard1 || ccTypeCard1.length === 0) {
+                    self.messageContainer.addErrorMessage({
+                        message: $t('Please select the card brand to proceed.')
+                    });
+                    $('html, body').animate({ scrollTop: $('#' + self.getCode()).offset().top }, 300);
+                    return false;
+                }
+
+                var towCardComponent = uiRegistry.get("two_card_braspag");
+                if (towCardComponent != undefined && towCardComponent.isShowCard2()) {
+                    var ccTypeCard2 = $('.creditcard-type-two').val();
+                    if (!ccTypeCard2 || ccTypeCard2.length === 0) {
+                        self.messageContainer.addErrorMessage({
+                            message: $t('Please select the card brand for the second card to proceed.')
+                        });
+                        $('html, body').animate({ scrollTop: $('#' + self.getCode()).offset().top }, 300);
+                        return false;
+                    }
+                }
+
                 this.isPlaceOrderActionAllowed(false);
 
                 fullScreenLoader.startLoader();
 
-                let towCardComponent = uiRegistry.get("two_card_braspag");
-                
-
-        
                 if (!self.isBpmpiEnabled()  || self.creditCardToken() != 'y_change_new'  || towCardComponent.creditCardAmount() != null) {
                     self.getPlaceOrderDeferredObject();
                     fullScreenLoader.stopLoader();

@@ -225,15 +225,19 @@ class Request extends BaseRequest  implements BraspaglibRequestInterface, Reques
      */
     public function getPaymentProvider()
     {
+        $ccType = $this->getPaymentData()->getCcType();
 
+        if ($this->getCardType() == 'two_card') {
+            $ccType = $this->cardTwo->getData('cc_type');
+        }
 
-        if ($this->getPaymentData()->getCcType()) {
+        if (!empty($ccType)) {
 
+            if ($this->getConfig()->getIsTestEnvironment()) {
+                return 'Simulado';
+            }
 
-            if ($this->getConfig()->getIsTestEnvironment())
-                return "Simulado";
-
-            list($provider, $brand) = array_pad(explode('-', $this->getPaymentData()->getCcType(), 2), 2, null);
+            list($provider, $brand) = array_pad(explode('-', $ccType, 2), 2, null);
 
             if ($provider === "Braspag") {
                 $availableTypes = explode(',', $this->getConfig()->getCcTypes());
@@ -386,10 +390,22 @@ class Request extends BaseRequest  implements BraspaglibRequestInterface, Reques
 
         if($this->getPaymentData()->getAdditionalInformation('cc_soptpaymenttoken'))
             $ccType = $this->getPaymentData()->getAdditionalInformation('cc_type');
-    
+
+        if (empty($ccType)) {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('Credit card brand is required. Please select your card brand and try again.')
+            );
+        }
+
         list($provider, $brand) = array_pad(explode('-', $ccType, 2), 2, null);
-       
-        return ($brand) ? $brand : 'Visa';
+
+        if (empty($brand)) {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('Credit card brand is required. Please select your card brand and try again.')
+            );
+        }
+
+        return $brand;
     }
 
 

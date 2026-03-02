@@ -213,20 +213,24 @@ define(
 
                     });
 
-                    this.creditCardNumber.subscribe(function (value) { 
-                
+                    this.creditCardNumber.subscribe(function (value) {
+
                         self.showBrandList(false);
-                        
-                        setTimeout(function(){ 
-                             self.oldCardBrand( $('.creditcard-type').val()) 
+
+                        setTimeout(function(){
+                             self.oldCardBrand( $('.creditcard-type-two').val());
+                             self.loadCreditCardBrands();
                          }, 1000);
 
                          self.oldCardNumber(value);
                      });
 
 
-                    this.selectBrand.subscribe(function (value) { 
-                        $('.creditcard-type-two').val("Braspag-"+value.split('-')[1]);
+                    this.selectBrand.subscribe(function (value) {
+                        if (!value) return;
+                        var brandValue = 'Braspag-' + value.split('-')[1];
+                        $('.creditcard-type-two').val(brandValue);
+                        self.creditCardType(brandValue);
 
                         if (self.oldCardBrand().split('-')[1] != undefined && self.oldCardBrand().split('-')[1] != value.split('-')[1] ) {
                             $('.card-wrapper-two-card .jp-card-container').hide();
@@ -271,30 +275,35 @@ define(
             loadCreditCardBrands :function (){
 
                 let self = this;
- 
+
                 let  cardType = $('.creditcard-type-two').val();
- 
-                 if (cardType != undefined) {
- 
+
+                 if (cardType) {
+
                      self.showBrandList(true);
-                     
+
                      let brandsObject =  this.brandListOptions();
- 
+
                      for (let i = 0, len = brandsObject.length; i < len; i++) {
                          if (!brandsObject[i]) continue;
-                       
+
                         if(cardType.split('-')[1] == brandsObject[i].split('-')[1]) {
                            self.selectBrand(brandsObject[i]);
                            break;
                         }
-     
+
                      }
- 
+
+                 } else {
+                     self.selectBrand('');
+                     if (self.creditCardNumber() && self.creditCardNumber().length > 0) {
+                         self.showBrandList(true);
+                     }
                  }
- 
+
                  if(self.creditCardNumber() == undefined || self.creditCardNumber().length == 0)
                      self.showBrandList(false);
- 
+
              },
 
              
@@ -499,9 +508,13 @@ define(
                     return;
                 }
 
-                this.creditCardType();
+                var detectedCard = card.cardFromNumber(number);
+                if (detectedCard !== undefined) {
+                    var brandValue = 'Braspag-' + detectedCard.typeName;
+                    $('.creditcard-type-two').val(brandValue);
+                    self.creditCardType(brandValue);
+                }
                 self.loadCreditCardBrands();
-               
             },
 
             isInstallmentsActive: function () {
