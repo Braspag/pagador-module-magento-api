@@ -87,18 +87,14 @@ class Request implements BraspaglibRequestInterface, BraspagMagentoRequestInterf
         return (bool) $this->getConfig()->getVoidOnHighRisk();
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getBrowserCookiesAccepted()
     {
+        return true;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function getBrowserEmail()
     {
+        return $this->getBillingAddress()->getEmail();
     }
 
     /**
@@ -313,5 +309,13 @@ class Request implements BraspaglibRequestInterface, BraspagMagentoRequestInterf
     public function getStoreId()
     {
         return $this->storeId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getTotalOrderAmount()
+    {
+        return (int) round($this->getOrderAdapter()->getGrandTotalAmount() * 100);
     }
 }
