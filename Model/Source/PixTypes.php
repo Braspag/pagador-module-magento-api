@@ -19,7 +19,8 @@ class PixTypes extends \Magento\Payment\Model\Source\Cctype
             "Simulado",
             "Cielo2",
             "Cielo30",
-            "Bradesco2"
+            "Bradesco2",
+            "BancoDoBrasil3"
         ];
     }
 }
