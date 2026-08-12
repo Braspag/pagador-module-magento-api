@@ -67,7 +67,7 @@ class RequestBuilder implements BuilderInterface
         $paymentId = $this->cardTwo->getData('transactionId');
 
         if (empty($paymentId)) {
-            $paymentId = str_replace(['-capture', '-void', '-refund'], '', $paymentDataObject->getPayment()->getLastTransId());
+            $paymentId = str_replace(['-capture', '-void', '-refund'], '', (string) ($paymentDataObject->getPayment()->getLastTransId() ?? ''));
         }
 
         $this->getRequest()->setPaymentId($paymentId);

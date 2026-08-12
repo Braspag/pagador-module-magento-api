@@ -72,7 +72,7 @@ class RequestBuilder implements BuilderInterface
         
 
         if (empty($paymentId)) {
-            $paymentId = str_replace(['-capture', '-void', '-refund'], '', $paymentDataObject->getPayment()->getLastTransId());
+            $paymentId = str_replace(['-capture', '-void', '-refund'], '', (string) ($paymentDataObject->getPayment()->getLastTransId() ?? ''));
         }
 
         if ($typeCard == 'capture_two_card')

@@ -208,7 +208,7 @@ class RequestBuilder implements BuilderInterface
     {
         $mdrsFromConfig = $this->getConfig()->getPaymentSplitMarketPlaceGeneralPaymentSplitMdrMultiple();
 
-        $mdrsFromData = explode("\r\n", $mdrsFromConfig);
+        $mdrsFromData = explode("\r\n", (string) ($mdrsFromConfig ?? ''));
 
         $mdrMultiplePattern = "^Product-(.*?)\|Brand-(.*?)\|InitialInstallmentNumber-(.*?)\|FinalInstallmentNumber-(.*?)\|Percent-(.*?)$";
 

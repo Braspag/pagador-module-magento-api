@@ -244,7 +244,7 @@ class Request
      */
     public function getCustomerAddressZipCode()
     {
-        return preg_replace('/[^0-9]/', '', $this->getBillingAddress()->getPostcode());
+        return preg_replace('/[^0-9]/', '', (string) ($this->getBillingAddress()->getPostcode() ?? ''));
     }
 
     /**
@@ -293,7 +293,7 @@ class Request
     public function getCustomerAddressPhone()
     {
 
-        $phone =  substr(preg_replace('/[^0-9]/', '', $this->getBillingAddress()->getTelephone()), 0, 11);
+        $phone =  substr(preg_replace('/[^0-9]/', '', (string) ($this->getBillingAddress()->getTelephone() ?? '')), 0, 11);
         return ConfigInterface::COUNTRY_TELEPHONE_CODE . '' .
             substr($phone, 0, 2) . '' . substr($phone, 2, 5) . '' . substr($phone, 7);
     }
@@ -476,7 +476,7 @@ class Request
      */
     protected function getBillingAddressAttribute($attribute)
     {
-        if (preg_match('/^street_/', $attribute)) {
+        if ($attribute !== null && preg_match('/^street_/', $attribute)) {
             $line = (int) str_replace('street_', '', $attribute);
             return $this->getQuoteBillingAddress()->getStreetLine($line);
         }
@@ -490,7 +490,7 @@ class Request
      */
     protected function getShippingAddressAttribute($attribute)
     {
-        if (preg_match('/^street_/', $attribute)) {
+        if ($attribute !== null && preg_match('/^street_/', $attribute)) {
             $line = (int) str_replace('street_', '', $attribute);
             return $this->getQuoteShippingAddress()->getStreetLine($line);
         }

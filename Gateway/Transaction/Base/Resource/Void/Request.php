@@ -80,10 +80,10 @@ class Request implements BraspaglibRequestInterface, BraspagMagentoRequestInterf
         $grandTotalAmount = $this->getOrderAdapter()->getGrandTotalAmount();
 
         if ($this->cardTwo->getData('type_card') == 'two_card' || $this->cardTwo->getData('type_card') == 'capture_two_card' )
-            $grandTotalAmount =  str_replace(',', '.', $this->cardTwo->getData('total_amount'));
+            $grandTotalAmount =  str_replace(',', '.', (string) ($this->cardTwo->getData('total_amount') ?? ''));
 
         if ($this->cardTwo->getData('type_card') == 'primary_card')
-            $grandTotalAmount =  $grandTotalAmount -  str_replace(',', '.', $this->cardTwo->getData('total_amount'));
+            $grandTotalAmount =  $grandTotalAmount -  str_replace(',', '.', (string) ($this->cardTwo->getData('total_amount') ?? ''));
 
         $integerValue = $this->grandTotalPricingHelper->currency($grandTotalAmount);
 

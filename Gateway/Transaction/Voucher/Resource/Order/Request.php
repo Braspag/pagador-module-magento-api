@@ -139,10 +139,10 @@ class Request  extends BaseRequest  implements BraspagMagentoRequestInterface, B
     public function getPaymentProvider()
     {
 
-        list($provider, $brand) = array_pad(explode('-', $this->getPaymentData()->getCcType(), 2), 2, null);
+        list($provider, $brand) = array_pad(explode('-', (string) ($this->getPaymentData()->getCcType() ?? ''), 2), 2, null);
 
         if ($provider === "Braspag") {
-            $availableTypes = explode(',', $this->getConfig()->getVcTypes());
+            $availableTypes = explode(',', (string) ($this->getConfig()->getVcTypes() ?? ''));
 
             foreach ($availableTypes as $key => $availableType) {
                 $typeDetail = explode("-", $availableType);
@@ -196,7 +196,7 @@ class Request  extends BaseRequest  implements BraspagMagentoRequestInterface, B
 
     public function getPaymentVoucherBrand()
     {
-        list($provider, $brand) = array_pad(explode('-', $this->getPaymentData()->getCcType(), 2), 2, null);
+        list($provider, $brand) = array_pad(explode('-', (string) ($this->getPaymentData()->getCcType() ?? ''), 2), 2, null);
 
         return $brand;
     }

@@ -188,10 +188,10 @@ class Request extends BaseRequest  implements BraspaglibRequestInterface, Reques
             $installment = $this->getPaymentInstallments();
 
             if ($this->getCardType() == 'two_card')
-                $grandTotalAmount =   str_replace(',', '.',  str_replace('.', '',  $this->cardTwo->getData('total_amount')));
+                $grandTotalAmount =   str_replace(',', '.',  str_replace('.', '',  (string) ($this->cardTwo->getData('total_amount') ?? '')));
 
             if ($this->getCardType() == 'primary_card')
-                $grandTotalAmount =  $grandTotalAmount - str_replace(',', '.',  str_replace('.', '',  $this->cardTwo->getData('total_amount')));
+                $grandTotalAmount =  $grandTotalAmount - str_replace(',', '.',  str_replace('.', '',  (string) ($this->cardTwo->getData('total_amount') ?? '')));
 
 
             $installmentsMaxWithoutInterest   = $this->getInstallmentsConfig()->getinstallmentsMaxWithoutInterest();
@@ -240,7 +240,7 @@ class Request extends BaseRequest  implements BraspaglibRequestInterface, Reques
             list($provider, $brand) = array_pad(explode('-', $ccType, 2), 2, null);
 
             if ($provider === "Braspag") {
-                $availableTypes = explode(',', $this->getConfig()->getCcTypes());
+                $availableTypes = explode(',', (string) ($this->getConfig()->getCcTypes() ?? ''));
 
 
                 foreach ($availableTypes as $key => $availableType) {

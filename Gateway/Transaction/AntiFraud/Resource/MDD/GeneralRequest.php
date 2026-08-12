@@ -173,7 +173,7 @@ class GeneralRequest extends AbstractMDD implements AdapterGeneralInterface
         $quote = $this->getConfig()->getQuote();
         $result = $quote->getBillingAddress()->getTelephone();
 
-        return (int) preg_replace('/[^0-9]/', '', $result);
+        return (int) preg_replace('/[^0-9]/', '', (string) ($result ?? ''));
     }
 
     public function getStoreIdentity()

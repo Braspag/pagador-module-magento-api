@@ -103,7 +103,7 @@ class CreditCard extends Info
         $priceFormatted = $this->getPriceHelper()->currency($amountAuthorized, true, false);
         $time = $installments > 1 ? 'times' : 'time';
 
-        return $priceFormatted . ' em '. str_replace('*', '', $this->paymentInfo->getAdditionalInformation('cc_installments_text_card2'));
+        return $priceFormatted . ' em '. str_replace('*', '', (string) ($this->paymentInfo->getAdditionalInformation('cc_installments_text_card2') ?? ''));
 
     }
 
