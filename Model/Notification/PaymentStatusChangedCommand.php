@@ -12,6 +12,8 @@ namespace Braspag\BraspagPagador\Model\Notification;
 
 use Braspag\BraspagPagador\Model\PaymentManager;
 use Braspag\BraspagPagador\Api\NotificationManagerInterface;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -38,14 +40,22 @@ class PaymentStatusChangedCommand
      */
     protected $logger;
 
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
+
     public function __construct(
         \Braspag\BraspagPagador\Gateway\Transaction\CreditCard\Config\ConfigInterface $config,
         PaymentManager $paymentManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ScopeConfigInterface $scopeConfig = null
     ) {
         $this->setPaymentManager($paymentManager);
         $this->setConfig($config);
         $this->logger = $logger;
+        $this->scopeConfig = $scopeConfig
+            ?: \Magento\Framework\App\ObjectManager::getInstance()->get(ScopeConfigInterface::class);
     }
 
     /**
@@ -138,6 +148,26 @@ class PaymentStatusChangedCommand
         // 2 = capture
         if ($paymentType == 'creditCard' && $paymentStatus == 2) {
             $createInvoice = $this->getConfig()->isCreateInvoiceOnNotificationCaptured();
+
+            // For synchronous capture (payment_action = authorize_capture) the
+            // invoice was already created by CheckoutSubmitAllAfterObserver
+            // during placeOrder. Creating another one here produces a duplicate
+            // (historical bug). In that case the notification only updates the
+            // status/history — PaymentManager handles that on the
+            // `$createInvoice = false` branch.
+            //
+            // The admin config `isCreateInvoiceOnNotificationCaptured` is still
+            // honored for the ASYNC flow (payment_action = authorize) where
+            // capture happens later via cron/manual and the invoice only
+            // materializes when Braspag notifies Status=2.
+            $methodCode = $magentoPaymentData->getMethod();
+            $paymentAction = (string) $this->scopeConfig->getValue(
+                sprintf('payment/%s/payment_action', $methodCode),
+                ScopeInterface::SCOPE_STORE
+            );
+            if ($paymentAction === 'authorize_capture') {
+                $createInvoice = false;
+            }
 
             return $this->getPaymentManager()
                 ->registerCapturedPayment($braspagPaymentData, $magentoPaymentData, $createInvoice);
