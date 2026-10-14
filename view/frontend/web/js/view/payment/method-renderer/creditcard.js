@@ -1,9 +1,9 @@
 /**
- * @author      Nexaas Team <dev@nexaas.com>
- * @copyright   2025 Nexaas (http://www.nexxaas.com)
- * @license     http://www.nexaas.com  Copyright
+ * @author      Webjump Core Team <dev@webjump.com>
+ * @copyright   2016 Webjump (http://www.webjump.com.br)
+ * @license     http://www.webjump.com.br  Copyright
  *
- * @link        http://www.nexaas.com
+ * @link        http://www.webjump.com.br
  */
 /*browser:true*/
 /*global define*/
@@ -25,7 +25,7 @@ define(
         'Magento_Checkout/js/model/error-processor',
         'mage/validation',
         'mage/url',
-        'Braspag_BraspagPagador/js/model/authentication3ds20',
+        'Braspag_BraspagPagador/js/model/mpiv3',
         'Braspag_BraspagPagador/js/view/payment/auth3ds20/bpmpi-renderer',
         'Braspag_BraspagPagador/js/model/card.view',
         'Braspag_BraspagPagador/js/model/card',
@@ -164,8 +164,8 @@ define(
 
 
                     this.selectBrand.subscribe(function (value) {
-
                         if (!value) return;
+
                         var brandValue = 'Braspag-' + value.split('-')[1];
                         $('.creditcard-type').val(brandValue);
                         self.creditCardType(brandValue);
@@ -176,13 +176,14 @@ define(
                             $('.card-wrapper .jp-card-container').show();
                         }
 
+
                     });
 
                     this.creditCardToken.subscribe(function (value) {
                         if (value == 'y_change_new') {
                          self.showCardElement(true)
                          self.cardTokenValue('');
-                         //setTimeout(() => {self.loadCreditCardForm()}, 2000);
+                         setTimeout(() => {self.loadCreditCardForm()}, 2000);
                         } else {
                          self.showCardElement(false)
                          self.cardTokenValue(value);
@@ -216,8 +217,7 @@ define(
                return require.toUrl('Braspag_BraspagPagador/images/cc/' + brand.split('-')[1] + '.png');
             },
             loadCreditCardForm: function() {
-                return false;
-                
+
                 if (!cardView.isCreditCardViewEnabled())
                     return false;
                 
@@ -299,24 +299,26 @@ define(
                 };
                 
                 let towCardComponent = uiRegistry.get("two_card_braspag");
-                
-                if (towCardComponent != undefined) {
-                    
-                    data.additional_data.cc_amount_card2 = towCardComponent.creditCardAmount()
-                    data.additional_data.cc_taxvat_card2 = towCardComponent.creditCardTaxvat()
-                    data.additional_data.cc_exp_year_card2 = towCardComponent.creditCardExpYear()
-                    data.additional_data.cc_exp_month_card2 = towCardComponent.creditCardExpMonth()
-                    data.additional_data.cc_number_card2 = towCardComponent.creditCardNumber()
-                    data.additional_data.cc_owner_card2 = towCardComponent.creditCardOwner()
-                    data.additional_data.cc_installments_card2 = towCardComponent.creditCardInstallments()
-                    data.additional_data.card_cc_token_card2 = towCardComponent.cardTokenValue()
-                    data.additional_data.cc_installments_text_card2 = $('select#braspag_pagador_creditcard_two_card_installments option:selected').text()
-                    data.additional_data.cc_cid_card2 = towCardComponent.creditCardVerificationNumber()
-                    data.additional_data.cc_type_card2 = $('.creditcard-type-two').val()
-                }
-              
 
-                if (sopt.isActive(this.getCode()) && this.isSoptActive() && !this.cardTokenValue()) {
+                if (towCardComponent != undefined) {
+
+                    data.additional_data.cc_amount_card2 = towCardComponent.creditCardAmount();
+                    data.additional_data.cc_taxvat_card2 = towCardComponent.creditCardTaxvat();
+                    data.additional_data.cc_exp_year_card2 = towCardComponent.creditCardExpYear();
+                    data.additional_data.cc_exp_month_card2 = towCardComponent.creditCardExpMonth();
+                    data.additional_data.cc_number_card2 = towCardComponent.creditCardNumber();
+                    data.additional_data.cc_cid_card2 = towCardComponent.creditCardVerificationNumber();
+                    data.additional_data.cc_owner_card2 = towCardComponent.creditCardOwner();
+                    data.additional_data.cc_installments_card2 = towCardComponent.creditCardInstallments();
+                    data.additional_data.card_cc_token_card2 = towCardComponent.cardTokenValue();
+                    data.additional_data.cc_installments_text_card2 = $('select#braspag_pagador_creditcard_two_card_installments option:selected').text();
+                    data.additional_data.cc_type_card2 = $('.creditcard-type-two').val();
+                }
+
+
+
+
+                if (sopt.isActive(this.getCode()) && this.isSoptActive()) {
                     data = {
                         'method': this.item.method,
                         'additional_data': {
@@ -628,7 +630,7 @@ define(
                 //card.forceRegisterCreditCardType(creditCardNumber, creditCardType);
 
                 var self = this;
-                if (sopt.isActive(this.getCode()) && this.isSoptActive() && !this.cardTokenValue()) {
+                if (sopt.isActive(this.getCode()) && this.isSoptActive()) {
                     this.updateCreditCardExpData();
                     this.updateCreditCardSoptPaymentToken();
                 } else {
@@ -707,7 +709,11 @@ define(
                         self.bpmpiAuthEci($('.bpmpi_auth_eci').val());
                         self.bpmpiAuthVersion($('.bpmpi_auth_version').val());
                         self.bpmpiAuthReferenceId($('.bpmpi_auth_reference_id').val());
-                        self.bpmpiCcType($('.creditcard-type').val());
+                        // Legacy line calling `self.bpmpiCcType(...)` removed —
+                        // the observable was never declared in defaults, and
+                        // the value was not consumed anywhere. Left in place
+                        // it throws `TypeError: bpmpiCcType is not a function`
+                        // and blocks placeOrder from firing.
 
                         self.getPlaceOrderDeferredObject();
                         fullScreenLoader.stopLoader();
@@ -769,7 +775,7 @@ define(
                     return false;
                 }
 
-                var towCardComponent = uiRegistry.get("two_card_braspag");
+                var towCardComponent = uiRegistry.get('two_card_braspag');
                 if (towCardComponent != undefined && towCardComponent.isShowCard2()) {
                     var ccTypeCard2 = $('.creditcard-type-two').val();
                     if (!ccTypeCard2 || ccTypeCard2.length === 0) {
@@ -785,7 +791,7 @@ define(
 
                 fullScreenLoader.startLoader();
 
-                if (!self.isBpmpiEnabled()  || self.creditCardToken() != 'y_change_new'  || towCardComponent.creditCardAmount() != null) {
+                if (!self.isBpmpiEnabled()) {
                     self.getPlaceOrderDeferredObject();
                     fullScreenLoader.stopLoader();
                     return true;
@@ -794,7 +800,7 @@ define(
                 self.bpmpiPopulateCreditcardData();
                 self.bpmpiPopulateAdditionalData();
 
-                authentication3ds20.bpmpiAuthenticate()
+                authentication3ds20.bpmpiAuthenticate('creditcard')
                     .then(function (data){
                         return false;
                     }).catch(function(){
@@ -837,6 +843,7 @@ define(
              * @returns {Object}
              */
             getCcYears: function () {
+                // return window.checkoutConfig.payment.ccform.years[this.getCode()];
                 return window.checkoutConfig.payment.braspag_ccform.years[this.getCode()];
             },
 

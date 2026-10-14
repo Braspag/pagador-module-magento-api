@@ -414,9 +414,16 @@ class Request extends BaseRequest  implements BraspaglibRequestInterface, Reques
      */
     public function getPaymentAuthenticate()
     {
-        if ($this->getPaymentData()->getAdditionalInformation('cc_token') || ConfigInterface::CONFIG_XML_BRASPAG_PAGADOR_CREDITCARD_TWO_CARD_ACTIVE)
-            return false;
-
+        // Pre-existing guard removed on 2026-10-14. The brasapi version used
+        // to short-circuit to false whenever `cc_token` was set OR when the
+        // CONFIG_XML_*_TWO_CARD_ACTIVE constant evaluated truthy — and that
+        // constant is a non-empty admin path string, so the right side was
+        // ALWAYS true and the method ALWAYS returned false. On top of being
+        // broken, the intent was wrong: isTwoCardActive() tells us the
+        // 2-card feature is enabled in admin, not that THIS transaction is
+        // being paid with 2 cards. Aligned with the SDK module's clean
+        // implementation: 3DS is active whenever the admin toggle says so
+        // and the frontend has not reported a failure_type==DISABLED.
         return (bool) $this->getConfig()->isAuth3Ds20Active()
             && $this->getPaymentExternalAuthenticationFailureType() != ConfigInterface::BRASPAG_PAGADOR_CREDITCARD_AUTHENTICATION_3DS_20_RETURN_TYPE_DISABLED;
     }

@@ -11,12 +11,10 @@
 
 namespace Braspag\BraspagPagador\Api\Transaction;
 
-use Braspag\BraspagPagador\Api\Factories\Auth3Ds20TokenCommandFactory;
 use Braspag\BraspagPagador\Api\Factories\OAuth2TokenCommandFactory;
 use Braspag\BraspagPagador\Api\Factories\PaymentSplitTransactionPostCommandFactory;
 use Braspag\BraspagPagador\Api\Factories\PaymentSplitCreateSubordinateCommandFactory;
 use Braspag\BraspagPagador\Api\Factories\PaymentSplitGetSubordinateCommandFactory;
-use Braspag\BraspagPagador\Api\Factories\Auth3Ds20TokenRequestFactory;
 use Braspag\BraspagPagador\Api\Factories\OAuth2TokenRequestFactory;
 use Braspag\BraspagPagador\Api\Factories\BoletoRequestFactory;
 use Braspag\BraspagPagador\Api\Factories\PaymentRequestFactory;
@@ -33,7 +31,6 @@ use Braspag\BraspagPagador\Api\Factories\VoucherRequestFactory;
 use Braspag\BraspagPagador\Api\Transaction\Api\Boleto\Send\RequestInterface as BoletoRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\CreditCard\Send\RequestInterface as CreditCardRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\Actions\RequestInterface as ActionsPaymentRequest;
-use Braspag\BraspagPagador\Api\Transaction\Api\Auth3Ds20\Token\RequestInterface as Auth3Ds20TokenRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\PaymentSplit\RequestInterface as PaymentSplitTransactionPostRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\PaymentSplit\CreateSubordinate\RequestInterface as PaymentSplitCreateSubordinateRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\PaymentSplit\GetSubordinate\RequestInterface as PaymentSplitGetSubordinateRequest;
@@ -49,17 +46,6 @@ use Braspag\BraspagPagador\Api\Transaction\Command\SalesCommand;
 
 class Api implements ApiInterface
 {
-    /**
-     * @param ActionsAuthenticateRequest $request
-     * @return AuthenticateCommand
-     */
-    public function getToken(Auth3Ds20TokenRequest $request)
-    {
-        $request = Auth3Ds20TokenCommandFactory::make(Auth3Ds20TokenRequestFactory::make($request))->getResult();
-
-        return $request;
-    }
-
     /**
      * @param ActionsAuthenticateRequest $request
      * @return AuthenticateCommand

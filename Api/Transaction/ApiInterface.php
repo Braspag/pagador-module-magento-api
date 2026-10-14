@@ -11,7 +11,6 @@
 
 namespace Braspag\BraspagPagador\Api\Transaction;
 
-use Braspag\BraspagPagador\Api\Transaction\Api\Auth3Ds20\Token\RequestInterface as ActionsAuthRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\Boleto\Send\RequestInterface as BoletoRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\CreditCard\Send\RequestInterface as CreditCardRequest;
 use Braspag\BraspagPagador\Api\Transaction\Api\PaymentSplit\RequestInterface as PaymentSplitTransactionPostRequest;
@@ -28,12 +27,6 @@ use Braspag\BraspagPagador\Api\Transaction\Command\SalesCommand;
 
 interface ApiInterface
 {
-    /**
-     * @param ActionsAuthRequest $request
-     * @return mixed
-     */
-    public function getToken(ActionsAuthRequest $request);
-
     /**
      * @param BoletoRequest $request
      * @return SalesCommand
