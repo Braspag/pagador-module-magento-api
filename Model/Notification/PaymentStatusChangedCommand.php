@@ -140,32 +140,39 @@ class PaymentStatusChangedCommand
             "Braspag Notification: Processing PaymentId {$paymentId} - Type: {$paymentType}, Status: {$paymentStatus}"
         );
 
+        // Duplicate-invoice guard for every capture branch.
+        //
+        // For synchronous capture (payment_action = authorize_capture) the
+        // invoice was already created by CheckoutSubmitAllAfterObserver
+        // during placeOrder. Creating another one here produces a duplicate
+        // (historical bug — originally observed on creditCard, then on
+        // debitCard, whose notifications arrive at this module tagged as
+        // paymentType=boleto). In those cases we force createInvoice=false
+        // and the notification only updates status/history (the
+        // `$createInvoice = false` branch in PaymentManager).
+        //
+        // Genuinely async flows (payment_action = authorize — e.g. real
+        // boleto, pix, or creditCard captured later via cron/manual) keep
+        // the branch default and still create the invoice when the Braspag
+        // notification arrives with Status=2.
+        $methodCode = $magentoPaymentData->getMethod();
+        $paymentAction = (string) $this->scopeConfig->getValue(
+            sprintf('payment/%s/payment_action', $methodCode),
+            ScopeInterface::SCOPE_STORE
+        );
+        $syncCapture = ($paymentAction === 'authorize_capture');
+
         // 2 = capture
         if ($paymentType == 'boleto' && $paymentStatus == 2) {
-            return $this->getPaymentManager()->registerCapturedPayment($braspagPaymentData, $magentoPaymentData, true);
+            $createInvoice = $syncCapture ? false : true;
+            return $this->getPaymentManager()
+                ->registerCapturedPayment($braspagPaymentData, $magentoPaymentData, $createInvoice);
         }
 
         // 2 = capture
         if ($paymentType == 'creditCard' && $paymentStatus == 2) {
             $createInvoice = $this->getConfig()->isCreateInvoiceOnNotificationCaptured();
-
-            // For synchronous capture (payment_action = authorize_capture) the
-            // invoice was already created by CheckoutSubmitAllAfterObserver
-            // during placeOrder. Creating another one here produces a duplicate
-            // (historical bug). In that case the notification only updates the
-            // status/history — PaymentManager handles that on the
-            // `$createInvoice = false` branch.
-            //
-            // The admin config `isCreateInvoiceOnNotificationCaptured` is still
-            // honored for the ASYNC flow (payment_action = authorize) where
-            // capture happens later via cron/manual and the invoice only
-            // materializes when Braspag notifies Status=2.
-            $methodCode = $magentoPaymentData->getMethod();
-            $paymentAction = (string) $this->scopeConfig->getValue(
-                sprintf('payment/%s/payment_action', $methodCode),
-                ScopeInterface::SCOPE_STORE
-            );
-            if ($paymentAction === 'authorize_capture') {
+            if ($syncCapture) {
                 $createInvoice = false;
             }
 
@@ -173,10 +180,12 @@ class PaymentStatusChangedCommand
                 ->registerCapturedPayment($braspagPaymentData, $magentoPaymentData, $createInvoice);
         }
 
-         // 2 = capture
-         if ($paymentType == 'pix' && $paymentStatus == 2) {
-            return $this->getPaymentManager()->registerCapturedPayment($braspagPaymentData, $magentoPaymentData, true);
-         }
+        // 2 = capture
+        if ($paymentType == 'pix' && $paymentStatus == 2) {
+            $createInvoice = $syncCapture ? false : true;
+            return $this->getPaymentManager()
+                ->registerCapturedPayment($braspagPaymentData, $magentoPaymentData, $createInvoice);
+        }
 
 
         // 3 = Denied/10 = Voided/13 = Aborted
